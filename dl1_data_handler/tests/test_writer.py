@@ -27,5 +27,8 @@ def test_gain_selection():
 
 
 def test_data_writer():
+    """
+    Test _process_data
+    """
     dld = DL1DataWriter()
     dld._process_data([get_dataset_path('gamma_test_large.simtel.gz')], 'delete.tmp')
