@@ -2,6 +2,8 @@ import numpy as np
 from ctapipe.calib.camera import gainselection
 from dl1_data_handler.writer import DL1DataWriter
 from ctapipe.utils import get_dataset_path
+from ctapipe.io import event_source
+from ctapipe.calib import CameraCalibrator
 
 gain_selector = gainselection.ThresholdGainSelector(select_by_sample=True)
 
@@ -32,4 +34,13 @@ def test_data_writer():
     Test _process_data
     """
     dld = DL1DataWriter()
-    dld._process_data([get_dataset_path('gamma_test_large.simtel.gz')], 'delete.tmp')
+    cal = CameraCalibrator()
+    # dld._process_data([get_dataset_path('gamma_test_large.simtel.gz')], 'delete.tmp') #need good unit test file
+    source = event_source(get_dataset_path('gamma_test_large.simtel.gz'))
+    for event in source:
+        cal.calibrate(event)
+        for tel_id, dl1 in enumerate(event.dl1):
+            camera = event.inst.subarray.tel[tel_id].camera
+            waveform = event.r0.tel[tel_id].waveform
+            image = event.dl1.tel[tel_id].image
+            dld.combine_channels(event)
